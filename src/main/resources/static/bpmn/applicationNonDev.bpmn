@@ -1,149 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0ksn4w9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.3.5">
   <bpmn:process id="hiring_process_for_candidate" isExecutable="true" camunda:historyTimeToLive="365">
-    <bpmn:endEvent id="Hired" name="candidate hired" camunda:asyncBefore="true">
-      <bpmn:incoming>SequenceFlow_0j64a2k</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:subProcess id="main_sub_process">
-      <bpmn:incoming>SequenceFlow_0l65etp</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0j64a2k</bpmn:outgoing>
-      <bpmn:exclusiveGateway id="ExclusiveGateway_16oynt0" name="good fit?">
-        <bpmn:incoming>SequenceFlow_03vhw1p</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_1dd8jge</bpmn:outgoing>
-        <bpmn:outgoing>SequenceFlow_1eddewg</bpmn:outgoing>
-      </bpmn:exclusiveGateway>
-      <bpmn:exclusiveGateway id="ExclusiveGateway_0pvvlcn" name="passed?">
-        <bpmn:incoming>SequenceFlow_1voxdhg</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_038s2r0</bpmn:outgoing>
-        <bpmn:outgoing>SequenceFlow_131laa5</bpmn:outgoing>
-      </bpmn:exclusiveGateway>
-      <bpmn:exclusiveGateway id="ExclusiveGateway_0joujsl" name="passed?">
-        <bpmn:incoming>SequenceFlow_1x5xktk</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_1s2s8hl</bpmn:outgoing>
-        <bpmn:outgoing>SequenceFlow_1t8zmgz</bpmn:outgoing>
-      </bpmn:exclusiveGateway>
-      <bpmn:sequenceFlow id="SequenceFlow_03vhw1p" sourceRef="AppliedQualified" targetRef="ExclusiveGateway_16oynt0" />
-      <bpmn:sequenceFlow id="SequenceFlow_1voxdhg" sourceRef="InterviewQualified" targetRef="ExclusiveGateway_0pvvlcn" />
-      <bpmn:sequenceFlow id="SequenceFlow_038s2r0" name="yes" sourceRef="ExclusiveGateway_0pvvlcn" targetRef="Interview2Qualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${onsiteInterviewPassedFirst}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="SequenceFlow_131laa5" name="no" sourceRef="ExclusiveGateway_0pvvlcn" targetRef="InterviewDisqualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!onsiteInterviewPassedFirst}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="SequenceFlow_1x5xktk" sourceRef="Interview2Qualified" targetRef="ExclusiveGateway_0joujsl" />
-      <bpmn:sequenceFlow id="SequenceFlow_1s2s8hl" name="no" sourceRef="ExclusiveGateway_0joujsl" targetRef="Interview2Disqualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!onsiteInterviewPassedSecond}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:startEvent id="StartEvent_0ptxzcc">
-        <bpmn:outgoing>SequenceFlow_1s6qijn</bpmn:outgoing>
-      </bpmn:startEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_1s6qijn" sourceRef="StartEvent_0ptxzcc" targetRef="AppliedQualified" />
-      <bpmn:endEvent id="EndEvent_1k0joop">
-        <bpmn:incoming>SequenceFlow_0pugczq</bpmn:incoming>
-      </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_0pugczq" sourceRef="OfferQualified" targetRef="EndEvent_1k0joop" />
-      <bpmn:userTask id="AppliedQualified" name="Bewerbung überprüfen">
-        <bpmn:extensionElements>
-          <camunda:formData>
-            <camunda:formField id="continue" label="continue?" type="boolean" />
-          </camunda:formData>
-          <camunda:properties>
-            <camunda:property name="simNextFire" value="${generator.bewerbungUeberpruefen(workerId)}" />
-            <camunda:property name="simGeneratePayload" value="goodFit=${generator.goodFit()}" />
-          </camunda:properties>
-        </bpmn:extensionElements>
-        <bpmn:incoming>SequenceFlow_1s6qijn</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_03vhw1p</bpmn:outgoing>
-      </bpmn:userTask>
-      <bpmn:userTask id="InterviewQualified" name="on-site interviews (I)&#10;(4 h)">
-        <bpmn:extensionElements>
-          <camunda:properties>
-            <camunda:property name="simNextFire" value="${generator.onsiteInterviewNondev(workerId)}" />
-            <camunda:property name="simGeneratePayload" value="onsiteInterviewPassedFirst=${generator.onsiteInterviewPassedFirst()}" />
-          </camunda:properties>
-        </bpmn:extensionElements>
-        <bpmn:incoming>SequenceFlow_1dd8jge</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_1voxdhg</bpmn:outgoing>
-      </bpmn:userTask>
-      <bpmn:userTask id="Interview2Qualified" name="on-site interviews (II)&#10;(1-2 h)">
-        <bpmn:extensionElements>
-          <camunda:properties>
-            <camunda:property name="simNextFire" value="${generator.onsiteInterviewNondevSecond(workerId)}" />
-            <camunda:property name="simGeneratePayload" value="onsiteInterviewPassedSecond=${generator.onsiteInterviewPassedSecond()}" />
-          </camunda:properties>
-        </bpmn:extensionElements>
-        <bpmn:incoming>SequenceFlow_038s2r0</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_1x5xktk</bpmn:outgoing>
-      </bpmn:userTask>
-      <bpmn:userTask id="OfferQualified" name="Vertragsverhandlung und Angebot">
-        <bpmn:extensionElements>
-          <camunda:properties>
-            <camunda:property name="simNextFire" value="${generator.vertragsverhandlungen(workerId)}" />
-            <camunda:property name="simGeneratePayload" value="firstWorkingDay=${generator.contractNegotiation()}" />
-          </camunda:properties>
-        </bpmn:extensionElements>
-        <bpmn:incoming>SequenceFlow_1t8zmgz</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_0pugczq</bpmn:outgoing>
-      </bpmn:userTask>
-      <bpmn:endEvent id="InterviewDisqualified" name="rejection">
-        <bpmn:incoming>SequenceFlow_131laa5</bpmn:incoming>
-        <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
-      </bpmn:endEvent>
-      <bpmn:endEvent id="Interview2Disqualified" name="rejection">
-        <bpmn:incoming>SequenceFlow_1s2s8hl</bpmn:incoming>
-        <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
-      </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_1dd8jge" name="yes" sourceRef="ExclusiveGateway_16oynt0" targetRef="InterviewQualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${goodFit}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:sequenceFlow id="SequenceFlow_1eddewg" name="no" sourceRef="ExclusiveGateway_16oynt0" targetRef="AppliedDisqualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!goodFit}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:endEvent id="AppliedDisqualified" name="rejection">
-        <bpmn:incoming>SequenceFlow_1eddewg</bpmn:incoming>
-        <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
-      </bpmn:endEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_1t8zmgz" name="yes" sourceRef="ExclusiveGateway_0joujsl" targetRef="OfferQualified">
-        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${onsiteInterviewPassedSecond}</bpmn:conditionExpression>
-      </bpmn:sequenceFlow>
-      <bpmn:textAnnotation id="TextAnnotation_01msra0">
-        <bpmn:text>max 3 working days</bpmn:text>
-      </bpmn:textAnnotation>
-      <bpmn:textAnnotation id="TextAnnotation_0yf166g">
-        <bpmn:text>max 2 working days</bpmn:text>
-      </bpmn:textAnnotation>
-      <bpmn:textAnnotation id="TextAnnotation_0zuj8ny">
-        <bpmn:text>max 2 working days</bpmn:text>
-      </bpmn:textAnnotation>
-      <bpmn:association id="Association_1tteljr" sourceRef="AppliedQualified" targetRef="TextAnnotation_01msra0" />
-      <bpmn:association id="Association_1bp78bm" sourceRef="ExclusiveGateway_0pvvlcn" targetRef="TextAnnotation_0yf166g" />
-      <bpmn:association id="Association_0hbh4xd" sourceRef="ExclusiveGateway_0joujsl" targetRef="TextAnnotation_0zuj8ny" />
-      <bpmn:textAnnotation id="TextAnnotation_0cr162h">
-        <bpmn:text>- Hack-Session
-- Whiteboard-Session
-- Meet another Engineering Manager
-- Personality-Fit</bpmn:text>
-      </bpmn:textAnnotation>
-      <bpmn:association id="Association_1530xmm" sourceRef="InterviewQualified" targetRef="TextAnnotation_0cr162h" />
-      <bpmn:textAnnotation id="TextAnnotation_0bk3ns4">
-        <bpmn:text>- Meet the team
-- Meet stakeholders</bpmn:text>
-      </bpmn:textAnnotation>
-      <bpmn:association id="Association_0d56tww" sourceRef="Interview2Qualified" targetRef="TextAnnotation_0bk3ns4" />
-    </bpmn:subProcess>
-    <bpmn:sequenceFlow id="SequenceFlow_0j64a2k" sourceRef="main_sub_process" targetRef="Hired" />
-    <bpmn:sequenceFlow id="SequenceFlow_0l65etp" sourceRef="StartEvent_14549pj" targetRef="main_sub_process" />
-    <bpmn:endEvent id="OfferDisqualified" name="candidate lost">
-      <bpmn:incoming>SequenceFlow_02c9cc3</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:boundaryEvent id="BoundaryEvent_1ojemcy" name="candidate nicht mehr interessiert" attachedToRef="main_sub_process">
-      <bpmn:outgoing>SequenceFlow_02c9cc3</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_1q8drrl" />
-    </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="SequenceFlow_02c9cc3" sourceRef="BoundaryEvent_1ojemcy" targetRef="OfferDisqualified" />
-    <bpmn:startEvent id="StartEvent_14549pj" name="candidate sourced">
-      <bpmn:outgoing>SequenceFlow_0l65etp</bpmn:outgoing>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_16oynt0" name="passt zum Unternehmen?">
+      <bpmn:incoming>SequenceFlow_03vhw1p</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1dd8jge</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1eddewg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0pvvlcn" name="bestanden?">
+      <bpmn:incoming>SequenceFlow_1voxdhg</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_038s2r0</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_131laa5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_0joujsl" name="bestanden?">
+      <bpmn:incoming>SequenceFlow_1x5xktk</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1s2s8hl</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1t8zmgz</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:startEvent id="StartEvent_0ptxzcc" name="Kandidat interessiert">
+      <bpmn:outgoing>SequenceFlow_1s6qijn</bpmn:outgoing>
     </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_1k0joop" name="Kandidat angenommen">
+      <bpmn:incoming>SequenceFlow_0pugczq</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="AppliedQualified" name="Bewerbung überprüfen">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="continue" label="continue?" type="boolean" />
+        </camunda:formData>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="${generator.bewerbungUeberpruefen(workerId)}" />
+          <camunda:property name="simGeneratePayload" value="goodFit=${generator.goodFit()}" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1s6qijn</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_03vhw1p</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="InterviewQualified" name="on-site interviews (I)&#10;(4 h)">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="${generator.onsiteInterviewNondev(workerId)}" />
+          <camunda:property name="simGeneratePayload" value="onsiteInterviewPassedFirst=${generator.onsiteInterviewPassedFirst()}" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1dd8jge</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1voxdhg</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="Interview2Qualified" name="on-site interviews (II)&#10;(1-2 h)">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="${generator.onsiteInterviewNondevSecond(workerId)}" />
+          <camunda:property name="simGeneratePayload" value="onsiteInterviewPassedSecond=${generator.onsiteInterviewPassedSecond()}" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_038s2r0</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1x5xktk</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="OfferQualified" name="Vertragsverhandlung und Angebot">
+      <bpmn:extensionElements>
+        <camunda:properties>
+          <camunda:property name="simNextFire" value="${generator.vertragsverhandlungen(workerId)}" />
+          <camunda:property name="simGeneratePayload" value="firstWorkingDay=${generator.contractNegotiation()}" />
+        </camunda:properties>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_1t8zmgz</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0pugczq</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="InterviewDisqualified" name="Ablehnung">
+      <bpmn:incoming>SequenceFlow_131laa5</bpmn:incoming>
+      <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="Interview2Disqualified" name="Ablehnung">
+      <bpmn:incoming>SequenceFlow_1s2s8hl</bpmn:incoming>
+      <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
+    </bpmn:endEvent>
+    <bpmn:endEvent id="AppliedDisqualified" name="Ablehnung">
+      <bpmn:incoming>SequenceFlow_1eddewg</bpmn:incoming>
+      <bpmn:escalationEventDefinition escalationRef="Escalation_03gyo08" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_03vhw1p" sourceRef="AppliedQualified" targetRef="ExclusiveGateway_16oynt0" />
+    <bpmn:sequenceFlow id="SequenceFlow_1dd8jge" name="ja" sourceRef="ExclusiveGateway_16oynt0" targetRef="InterviewQualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${goodFit}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1eddewg" name="nein" sourceRef="ExclusiveGateway_16oynt0" targetRef="AppliedDisqualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!goodFit}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1voxdhg" sourceRef="InterviewQualified" targetRef="ExclusiveGateway_0pvvlcn" />
+    <bpmn:sequenceFlow id="SequenceFlow_038s2r0" name="ja" sourceRef="ExclusiveGateway_0pvvlcn" targetRef="Interview2Qualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${onsiteInterviewPassedFirst}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_131laa5" name="nein" sourceRef="ExclusiveGateway_0pvvlcn" targetRef="InterviewDisqualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!onsiteInterviewPassedFirst}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1x5xktk" sourceRef="Interview2Qualified" targetRef="ExclusiveGateway_0joujsl" />
+    <bpmn:sequenceFlow id="SequenceFlow_1s2s8hl" name="nein" sourceRef="ExclusiveGateway_0joujsl" targetRef="Interview2Disqualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!onsiteInterviewPassedSecond}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1t8zmgz" name="ja" sourceRef="ExclusiveGateway_0joujsl" targetRef="OfferQualified">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${onsiteInterviewPassedSecond}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="SequenceFlow_1s6qijn" sourceRef="StartEvent_0ptxzcc" targetRef="AppliedQualified" />
+    <bpmn:sequenceFlow id="SequenceFlow_0pugczq" sourceRef="OfferQualified" targetRef="EndEvent_1k0joop" />
   </bpmn:process>
   <bpmn:message id="Message_1q8drrl" name="candidate_lost_interest" />
   <bpmn:message id="Message_1udqobr" name="solution_received" />
@@ -151,200 +107,131 @@
   <bpmn:escalation id="Escalation_0n1y8cx" name="application_expired" escalationCode="application_expired" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="hiring_process_for_candidate">
-      <bpmndi:BPMNShape id="TextAnnotation_01msra0_di" bpmnElement="TextAnnotation_01msra0">
-        <dc:Bounds x="484" y="105" width="100" height="40" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_16oynt0_di" bpmnElement="ExclusiveGateway_16oynt0" isMarkerVisible="true">
-        <dc:Bounds x="554" y="212" width="50" height="50" />
+        <dc:Bounds x="354" y="105" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="563" y="194" width="43" height="14" />
+          <dc:Bounds x="348" y="78" width="73" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_0pvvlcn_di" bpmnElement="ExclusiveGateway_0pvvlcn" isMarkerVisible="true">
-        <dc:Bounds x="984" y="212" width="50" height="50" />
+        <dc:Bounds x="594" y="105" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="988" y="192" width="42" height="14" />
+          <dc:Bounds x="590" y="85" width="58" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0yf166g_di" bpmnElement="TextAnnotation_0yf166g">
-        <dc:Bounds x="1038" y="105" width="100" height="40" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="ExclusiveGateway_0joujsl_di" bpmnElement="ExclusiveGateway_0joujsl" isMarkerVisible="true">
-        <dc:Bounds x="1469" y="212" width="50" height="50" />
+        <dc:Bounds x="829" y="105" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1473" y="193" width="42" height="14" />
+          <dc:Bounds x="825" y="86" width="58" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="EndEvent_1dabigf_di" bpmnElement="Hired">
-        <dc:Bounds x="2034" y="242" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="2014" y="285" width="76" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0zuj8ny_di" bpmnElement="TextAnnotation_0zuj8ny">
-        <dc:Bounds x="1529" y="106" width="100" height="38" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="SubProcess_0v0krl0_di" bpmnElement="main_sub_process" isExpanded="true">
-        <dc:Bounds x="245" y="83" width="1702" height="385" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1tteljr_di" bpmnElement="Association_1tteljr">
-        <di:waypoint x="470" y="197" />
-        <di:waypoint x="516" y="145" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_03vhw1p_di" bpmnElement="SequenceFlow_03vhw1p">
-        <di:waypoint x="484" y="237" />
-        <di:waypoint x="554" y="237" />
+        <di:waypoint x="324" y="130" />
+        <di:waypoint x="354" y="130" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1voxdhg_di" bpmnElement="SequenceFlow_1voxdhg">
-        <di:waypoint x="834" y="237" />
-        <di:waypoint x="984" y="237" />
+        <di:waypoint x="564" y="130" />
+        <di:waypoint x="594" y="130" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_038s2r0_di" bpmnElement="SequenceFlow_038s2r0">
-        <di:waypoint x="1034" y="237" />
-        <di:waypoint x="1225" y="237" />
+        <di:waypoint x="644" y="130" />
+        <di:waypoint x="695" y="130" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1122" y="219" width="17" height="14" />
+          <dc:Bounds x="666" y="112" width="8" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1bp78bm_di" bpmnElement="Association_1bp78bm">
-        <di:waypoint x="1020" y="223" />
-        <di:waypoint x="1073" y="145" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1x5xktk_di" bpmnElement="SequenceFlow_1x5xktk">
-        <di:waypoint x="1325" y="237" />
-        <di:waypoint x="1469" y="237" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0hbh4xd_di" bpmnElement="Association_0hbh4xd">
-        <di:waypoint x="1505" y="223" />
-        <di:waypoint x="1565" y="144" />
+        <di:waypoint x="795" y="130" />
+        <di:waypoint x="829" y="130" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_131laa5_di" bpmnElement="SequenceFlow_131laa5">
-        <di:waypoint x="1009" y="262" />
-        <di:waypoint x="1009" y="347" />
-        <di:waypoint x="1084" y="347" />
+        <di:waypoint x="619" y="155" />
+        <di:waypoint x="619" y="240" />
+        <di:waypoint x="694" y="240" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1018" y="302" width="13" height="14" />
+          <dc:Bounds x="624" y="195" width="21" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1s2s8hl_di" bpmnElement="SequenceFlow_1s2s8hl">
-        <di:waypoint x="1494" y="262" />
-        <di:waypoint x="1494" y="347" />
-        <di:waypoint x="1569" y="347" />
+        <di:waypoint x="854" y="155" />
+        <di:waypoint x="854" y="240" />
+        <di:waypoint x="929" y="240" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1503" y="302" width="13" height="14" />
+          <dc:Bounds x="859" y="195" width="21" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0j64a2k_di" bpmnElement="SequenceFlow_0j64a2k">
-        <di:waypoint x="1947" y="260" />
-        <di:waypoint x="2034" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StartEvent_0ptxzcc_di" bpmnElement="StartEvent_0ptxzcc">
-        <dc:Bounds x="282" y="219" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_1s6qijn_di" bpmnElement="SequenceFlow_1s6qijn">
-        <di:waypoint x="318" y="237" />
-        <di:waypoint x="384" y="237" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0l65etp_di" bpmnElement="SequenceFlow_0l65etp">
-        <di:waypoint x="189" y="276" />
-        <di:waypoint x="245" y="276" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="EndEvent_0pf5aml_di" bpmnElement="OfferDisqualified">
-        <dc:Bounds x="1839" y="537" width="36" height="36" />
+        <dc:Bounds x="152" y="112" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1823" y="580" width="69" height="14" />
+          <dc:Bounds x="143" y="155" width="55" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1s6qijn_di" bpmnElement="SequenceFlow_1s6qijn">
+        <di:waypoint x="188" y="130" />
+        <di:waypoint x="224" y="130" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_1k0joop_di" bpmnElement="EndEvent_1k0joop">
-        <dc:Bounds x="1879" y="219" width="36" height="36" />
+        <dc:Bounds x="1049" y="112" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1033" y="155" width="68" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0pugczq_di" bpmnElement="SequenceFlow_0pugczq">
-        <di:waypoint x="1789" y="237" />
-        <di:waypoint x="1879" y="237" />
+        <di:waypoint x="1020" y="130" />
+        <di:waypoint x="1049" y="130" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="UserTask_067ej8u_di" bpmnElement="AppliedQualified">
-        <dc:Bounds x="384" y="197" width="100" height="80" />
+        <dc:Bounds x="224" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_0h51wsv_di" bpmnElement="InterviewQualified">
-        <dc:Bounds x="734" y="197" width="100" height="80" />
+        <dc:Bounds x="464" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_1fmzy56_di" bpmnElement="Interview2Qualified">
-        <dc:Bounds x="1225" y="197" width="100" height="80" />
+        <dc:Bounds x="695" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="UserTask_1ec5f4t_di" bpmnElement="OfferQualified">
-        <dc:Bounds x="1689" y="197" width="100" height="80" />
+        <dc:Bounds x="920" y="90" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0nuul5p_di" bpmnElement="InterviewDisqualified">
-        <dc:Bounds x="1084" y="329" width="36" height="36" />
+        <dc:Bounds x="694" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1081" y="372" width="42" height="14" />
+          <dc:Bounds x="686" y="265" width="52" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0ift1gn_di" bpmnElement="Interview2Disqualified">
-        <dc:Bounds x="1569" y="329" width="36" height="36" />
+        <dc:Bounds x="929" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1566" y="372" width="42" height="14" />
+          <dc:Bounds x="921" y="265" width="52" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0cr162h_di" bpmnElement="TextAnnotation_0cr162h">
-        <dc:Bounds x="793" y="105" width="212" height="69" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1530xmm_di" bpmnElement="Association_1530xmm">
-        <di:waypoint x="829" y="199" />
-        <di:waypoint x="858" y="174" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0bk3ns4_di" bpmnElement="TextAnnotation_0bk3ns4">
-        <dc:Bounds x="1305" y="103" width="131" height="44" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_0d56tww_di" bpmnElement="Association_0d56tww">
-        <di:waypoint x="1309" y="197" />
-        <di:waypoint x="1352" y="147" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1dd8jge_di" bpmnElement="SequenceFlow_1dd8jge">
-        <di:waypoint x="604" y="237" />
-        <di:waypoint x="734" y="237" />
+        <di:waypoint x="404" y="130" />
+        <di:waypoint x="464" y="130" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="661" y="219" width="17" height="14" />
+          <dc:Bounds x="430" y="112" width="8" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="BoundaryEvent_05jome0_di" bpmnElement="BoundaryEvent_1ojemcy">
-        <dc:Bounds x="1731" y="450" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1710" y="417" width="83" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="SequenceFlow_02c9cc3_di" bpmnElement="SequenceFlow_02c9cc3">
-        <di:waypoint x="1749" y="486" />
-        <di:waypoint x="1749" y="555" />
-        <di:waypoint x="1839" y="555" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="SequenceFlow_1eddewg_di" bpmnElement="SequenceFlow_1eddewg">
-        <di:waypoint x="579" y="262" />
-        <di:waypoint x="579" y="347" />
-        <di:waypoint x="652" y="347" />
+        <di:waypoint x="379" y="155" />
+        <di:waypoint x="379" y="240" />
+        <di:waypoint x="452" y="240" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="588" y="302" width="13" height="14" />
+          <dc:Bounds x="384" y="195" width="21" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="EndEvent_136t0yz_di" bpmnElement="AppliedDisqualified">
-        <dc:Bounds x="652" y="329" width="36" height="36" />
+        <dc:Bounds x="452" y="222" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="649" y="372" width="42" height="14" />
+          <dc:Bounds x="444" y="265" width="52" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1t8zmgz_di" bpmnElement="SequenceFlow_1t8zmgz">
-        <di:waypoint x="1519" y="237" />
-        <di:waypoint x="1689" y="237" />
+        <di:waypoint x="879" y="130" />
+        <di:waypoint x="920" y="130" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1596" y="219" width="17" height="14" />
+          <dc:Bounds x="896" y="112" width="8" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="StartEvent_1n3atfe_di" bpmnElement="StartEvent_14549pj">
-        <dc:Bounds x="153" y="258" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="127" y="301" width="90" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
